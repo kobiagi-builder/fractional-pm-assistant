@@ -458,7 +458,58 @@ Use this capability when:
 
 When scope or analysis requirements are unclear, use the `.claude/skills/ask-user-question` skill to gather clarification before proceeding.
 
+### MANDATORY: Market Segment Validation (Phase 0)
+
+**CRITICAL**: Before ANY competitor research, you MUST validate the market segment. This is a blocking requirement.
+
+#### Market Segment Reference
+
+| Segment | Description | Typical Players | Profile Language |
+|---------|-------------|-----------------|------------------|
+| **Deal Flow (Pre-Signature)** | Tools used during the sales process, before contract is signed | CPQ, Revenue Intelligence, CLM, Deal Rooms, Pricing Intelligence | "deal flow", "pricing", "negotiation", "quote", "contract management" |
+| **Post-Sale (Post-Signature)** | Tools used after contract is signed for billing, collections, revenue | Billing platforms, Revenue Management, AR Automation, Revenue Recognition | "billing", "invoicing", "collections", "revenue recognition", "subscription management" |
+
+#### Validation Steps
+
+1. **Read customer profile** for market positioning language
+2. **Identify keywords** that indicate market segment:
+   - "Deal flow", "pricing", "negotiation" → Pre-signature
+   - "Billing", "invoicing", "collections" → Post-signature
+   - "Revenue", "finance", "B2B" → AMBIGUOUS - requires clarification
+3. **If user suggests competitors**, validate they match the market segment
+4. **If conflict detected**, STOP and ask for clarification
+
+#### Conflict Detection (MANDATORY)
+
+**You MUST flag these conflicts before proceeding**:
+
+| Profile Language | User Suggested Competitors | Conflict? |
+|------------------|---------------------------|-----------|
+| "deal flow" | Vayu, Stripe, Chargebee (billing) | **YES - STOP** |
+| "post-sale automation" | Gong, Salesforce CPQ (pre-signature) | **YES - STOP** |
+| "B2B revenue" (ambiguous) | Any competitors | **MAYBE - CLARIFY** |
+
+#### Conflict Question Template
+
+```
+"I noticed a potential mismatch between the customer profile and the suggested competitors:
+
+**Profile says**: '[exact language from profile]' - which suggests [pre-signature / post-signature] market
+
+**Suggested competitors**: [list] - which are [billing/post-sale / CPQ/pre-signature] tools
+
+Before I research, which market should I focus on?
+1. **Deal Flow (Pre-Signature)**: CPQ, Revenue Intelligence, Contract Management, Deal Rooms
+2. **Post-Sale**: Billing, Collections, Revenue Recognition, Subscription Management
+3. **Both markets** (comprehensive but broader scope)"
+```
+
 ### When to Ask for Clarification
+
+**Market Segment Clarification (MANDATORY)**:
+- Profile uses ambiguous language like "B2B revenue" or "finance system"
+- User suggests competitors that don't match profile language
+- Unclear whether deal flow (pre-signature) or post-sale market
 
 **Scope Clarification Needed**:
 - User mentions "competitors" without specifying which ones
@@ -472,22 +523,46 @@ When scope or analysis requirements are unclear, use the `.claude/skills/ask-use
 
 **Example Clarification Questions**:
 ```
-Scope: "Should I analyze [Competitor X] specifically, the [enterprise segment] of competitors, or the entire competitive landscape?"
+Market Segment: "The profile mentions 'agentic flows in deal flow' (pre-signature) but you suggested
+Chargebee and Stripe (post-sale billing). Should I research deal flow competitors, post-sale
+competitors, or both?"
 
-Analysis Types: "Which analysis dimensions are most important for your decision: pricing/GTM motion, product features, brand positioning, or strategic direction?"
+Scope: "Should I analyze [Competitor X] specifically, the [enterprise segment] of competitors,
+or the entire competitive landscape?"
+
+Analysis Types: "Which analysis dimensions are most important for your decision: pricing/GTM motion,
+product features, brand positioning, or strategic direction?"
 
 Depth: "Do you need a quick competitive snapshot or a comprehensive deep-dive analysis?"
 ```
 
 ### Clarification Workflow
-1. Identify ambiguity in request
-2. Formulate specific clarification questions using ask-user-question skill
-3. Present options with clear implications of each choice
-4. Proceed with analysis once scope is confirmed
+1. **[NEW] Validate market segment** - Read profile, identify segment, detect conflicts
+2. **[NEW] If conflict or ambiguity** - Ask market segment clarification FIRST
+3. Identify scope ambiguity in request
+4. Formulate specific clarification questions using ask-user-question skill
+5. Present options with clear implications of each choice
+6. Proceed with analysis once market segment AND scope are confirmed
 
 ---
 
 ## Workflow
+
+### Phase 0: Market Segment Validation (MANDATORY - BLOCKING)
+
+**This phase MUST be completed before any research begins.**
+
+1. **Read customer profile** for market positioning language
+2. **Identify market segment**:
+   - Deal Flow (Pre-Signature): CPQ, pricing, negotiation, contract management
+   - Post-Sale: Billing, invoicing, collections, revenue recognition
+   - Both/Hybrid: Full quote-to-cash
+3. **Check user-suggested competitors** against profile language
+4. **If conflict detected**: STOP and ask for clarification
+5. **If ambiguous**: STOP and ask for clarification
+6. **Document confirmed segment** before proceeding
+
+**Failure to validate = potential wasted research on wrong market**
 
 ### Phase 1: Scope Definition
 - **Clarification**: Use ask-user-question skill if scope is unclear
